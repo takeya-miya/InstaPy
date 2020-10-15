@@ -24,6 +24,7 @@ def get_followers(
     store_locally,
     logger,
     logfolder,
+    after
 ):
     """ Get entire list of followers using graphql queries. """
 
@@ -93,6 +94,8 @@ def get_followers(
 
     variables["id"] = user_data["id"]
     variables["first"] = 50
+    if after:
+        variables["after"] = after
 
     # get follower and user loop
 
@@ -200,6 +203,12 @@ def get_followers(
                     grab_notifier = True
                     break
 
+            has_next_data = page_info["has_next_page"]
+            if has_next_data:
+                variables["after"] = page_info["end_cursor"]
+            else:
+                variables["after"] = None
+
             if grab != "full" and grabbed >= grab:
                 print("\n")
                 logger.info(
@@ -210,10 +219,7 @@ def get_followers(
                 grab_notifier = True
                 break
 
-            has_next_data = page_info["has_next_page"]
             if has_next_data:
-                variables["after"] = page_info["end_cursor"]
-
                 url = "{}&variables={}".format(
                     graphql_followers, str(json.dumps(variables))
                 )
@@ -236,7 +242,7 @@ def get_followers(
                                 str(exc).encode("utf-8")
                             )
                         )
-
+                sleep(random.uniform(8, 15))
                 # take breaks gradually
                 if sc_rolled > 91:
                     print("\n")
@@ -291,7 +297,7 @@ def get_followers(
     sleep(sleep_t)
     logger.info("Yawn :] let's go!\n")
 
-    return all_followers
+    return all_followers, variables["after"]
 
 
 def get_following(

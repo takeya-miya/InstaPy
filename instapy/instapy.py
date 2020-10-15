@@ -4224,6 +4224,7 @@ class InstaPy:
         amount: int = None,
         live_match: bool = False,
         store_locally: bool = True,
+        after: str = None
     ):
         """
          Gets and returns `followers` information of given user
@@ -4254,7 +4255,7 @@ class InstaPy:
             return self
 
         # Get `followers` data
-        grabbed_followers = get_followers(
+        grabbed_followers, after = get_followers(
             self.browser,
             username,
             amount,
@@ -4263,8 +4264,9 @@ class InstaPy:
             store_locally,
             self.logger,
             self.logfolder,
+            after
         )
-        return grabbed_followers
+        return grabbed_followers, after
 
     def grab_following(
         self,
